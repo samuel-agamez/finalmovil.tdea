@@ -1,0 +1,35 @@
+# Dependencias y build
+node_modules/
+.expo/
+dist/
+build/
+coverage/
+web-build/
+
+# Secretos y credenciales
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.keystore
+*.jks
+firebase-adminsdk*.json
+google-services.json
+GoogleService-Info.plist
+.vercel/
+.easignore
+
+# Configuración local de la IA (no se comparte)
+.claude/settings.local.json
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log
+npm-debug.log*

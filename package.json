@@ -1,0 +1,39 @@
+{
+  "name": "10-tarjetas-de-estudio-app",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build": "expo export --platform android",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "jest --coverage --ci",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,json,md,yml,yaml}": "prettier --write",
+    "*.{ts,tsx}": "eslint --fix --max-warnings 0"
+  },
+  "dependencies": {
+    "expo": "~58.0.25"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "eslint": "^10.15.0",
+    "eslint-config-expo": "~58.0.4",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "jest": "^30.5.2",
+    "jest-expo": "~58.0.14",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.10.1",
+    "typescript": "^7.0.2"
+  }
+}
