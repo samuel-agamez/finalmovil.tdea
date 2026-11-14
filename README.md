@@ -7,9 +7,11 @@ Repositorio hermano: `10-tarjetas-de-estudio-api` (Next.js + Firebase).
 
 ## Estado
 
-Primer commit: **configuración de IA y de calidad**, antes de generar la
-interfaz. Ya existe la regla pura de Leitner y su prueba; la app se construye
-en los siguientes commits.
+- `a9c49b5`: **configuración de IA y de calidad** (primer commit).
+- `278f55f`: regla pura de Leitner y sus pruebas.
+
+La interfaz, SQLite y la sincronización se construyen en los siguientes
+commits.
 
 ## Requisitos
 

@@ -33,6 +33,16 @@ Se agregan las entradas de cada sesión real; no se borran las correcciones.
   `Read(!.env.example)`.
 - **Decisión**: se rechazó `.claudeignore`; se usan permisos + sandbox + hook.
 
+## 2026-11-14 · Regla de Leitner
+
+- **Propósito**: implementar la transición de cajas (acierto sube, fallo vuelve
+  a la caja 1) como función pura, antes de la UI y de SQLite.
+- **Evidencia**: `src/services/leitner.ts` y `src/services/leitner.test.ts`.
+- **Validación**: revisión de la tabla de transiciones y de los límites 1..5.
+  `npm test` queda pendiente hasta instalar las dependencias de la app.
+- **Decisión**: no se mezcla con React Native ni con la base de datos; así se
+  prueba aislada y se reutiliza en la sesión de estudio.
+
 ## 2026-11-14 · Caso rechazado 3: `Bash(curl *)` como frontera
 
 - **Propósito**: bloquear la salida a internet con una regla simple.
