@@ -3,12 +3,15 @@
 Mazos de tarjetas pregunta/respuesta con repaso espaciado simple (cajas de
 Leitner). App móvil en **Expo + React Native + TypeScript + Expo Router**.
 
-Repositorio hermano: `10-tarjetas-de-estudio-api` (Next.js + Firebase).
+Repositorio: https://github.com/samuel-agamez/finalmovil.tdea
+
+Repositorio hermano: [`repositario_de_prueba`](https://github.com/samuel-agamez/repositario_de_prueba)
+(API en Next.js + Firebase).
 
 ## Estado
 
-- `a9c49b5`: **configuración de IA y de calidad** (primer commit).
-- `278f55f`: regla pura de Leitner y sus pruebas.
+- `78ddcbf`: **configuración de IA y de calidad** (primer commit).
+- `05c20f3`: regla pura de Leitner y sus pruebas.
 
 La interfaz, SQLite y la sincronización se construyen en los siguientes
 commits.
