@@ -12,9 +12,11 @@ Repositorio hermano: [`repositario_de_prueba`](https://github.com/samuel-agamez/
 
 - `78ddcbf`: **configuración de IA y de calidad** (primer commit).
 - `05c20f3`: regla pura de Leitner y sus pruebas.
+- `a4a34b3`: enlaces y hashes del README.
 
-La interfaz, SQLite y la sincronización se construyen en los siguientes
-commits.
+La puerta `npm run check` está en verde (typecheck + lint + formato + 6
+pruebas, cobertura 100 % de statements y funciones). La interfaz, SQLite y
+la sincronización se construyen en los siguientes commits.
 
 ## Requisitos
 
@@ -30,13 +32,15 @@ cp .env.example .env.local   # ajusta EXPO_PUBLIC_API_URL
 npm start
 ```
 
-Dependencias de la app (siguiente paso, con permiso):
+Dependencias instaladas con `npx expo install` (versiones del SDK 58) más
+tres fijadas a mano por compatibilidad:
 
-```bash
-npx expo install expo-router expo-sqlite expo-secure-store \
-  react-native-gesture-handler react-native-reanimated \
-  expo-speech expo-notifications expo-haptics expo-sensors
-```
+- `typescript@~6.0.3`: Expo 58 espera esta versión; la 7 ya no expone la
+  API que `typescript-eslint` necesita y rompe `npm run lint`.
+- `eslint@^9.39.5`: `eslint-plugin-react` (vía `eslint-config-expo`) todavía
+  no soporta ESLint 10.
+- `react-native-web@~0.21.4` y `react-native-worklets` como dependencia
+  directa, como pide el checklist.
 
 ## Scripts
 
@@ -48,6 +52,7 @@ npx expo install expo-router expo-sqlite expo-secure-store \
 | `npm run format:check` | Prettier en modo verificación.                             |
 | `npm test`             | Jest + jest-expo con cobertura.                            |
 | `npm start`            | Expo.                                                      |
+| `npm run build`        | `expo export --platform android`.                          |
 
 ## Configuración de IA
 

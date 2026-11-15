@@ -52,3 +52,33 @@ Se agregan las entradas de cada sesión real; no se borran las correcciones.
   limita los dominios permitidos.
 - **Decisión**: se mantiene `deny` como primera capa, pero no se presenta como
   frontera única; se documentan sus límites en `ia/CONFIGURACION.md`.
+
+## 2026-11-15 · Puerta `npm run check` en verde
+
+- **Propósito**: dejar la puerta completa en verde antes de empezar la
+  interfaz, sin saltársela.
+- **Evidencia**: `package.json` (dependencias del SDK 58), `tsconfig.json`
+  (`"types": ["jest"]`), `eslint.config.mjs` (import `eslint-config-expo/flat.js`),
+  `app.json` (4 plugins) y `package-lock.json`.
+- **Validación**: `npx expo install --check` → «Dependencies are up to date»;
+  `npm run check` pasa entero (typecheck + lint + formato + 6 pruebas,
+  cobertura 100 % stmts/funcs, 92,85 % ramas); `npm run build` empaqueta
+  Android con Metro.
+- **Decisión**: cuatro arreglos de compatibilidad, cada uno con su causa
+  medida antes de tocar nada:
+  1. `tsc` no cargaba `@types/jest` → `"types": ["jest"]` en el `tsconfig`
+     (comprobado quitándolo: sin eso, `describe`/`it`/`expect` no resuelven).
+  2. `typescript@7.0.2` (compilador nativo, sin `TypeFlags`) rompía
+     `typescript-eslint` → `typescript@~6.0.3`, la versión que pide el
+     template de Expo SDK 58 (`npx expo install --check` lo confirma).
+  3. `eslint@10` eliminó `context.getFilename()` y `eslint-plugin-react`
+     7.37.5 (peer `^9.7`, lo más reciente que existe) todavía lo usa →
+     `eslint@^9.39.5`, la línea de mantenimiento que ya usa la API hermana.
+  4. `@typescript-eslint/parser` y `eslint-import-resolver-typescript`
+     quedaron anidados bajo `eslint-config-expo` por el conflicto de peers
+     anterior → se borraron sus dos entradas del lock y `npm install` los
+     volvió a colocar en la raíz (`npm dedupe` no bastó).
+     Además: import corregido a `eslint-config-expo/flat.js` (en ESM el
+     directorio `flat/` no se puede importar) y `app.json` formateado.
+- **Decisión extra**: se corrigió la puerta en lugar de salirse de ella;
+  ninguna de las cuatro correcciones añade reglas ni relaja la calidad.
