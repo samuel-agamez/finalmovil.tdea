@@ -1,19 +1,21 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { useRouter } from 'expo-router';
-import { login, registro } from '../api/auth';
+import { login } from '../api/auth';
 import { FalloApi } from '../api/errores';
 import { guardarSesion } from '../api/sesion';
 import { Login } from './login';
 
 jest.mock('expo-router', () => ({ useRouter: jest.fn() }));
-jest.mock('../api/auth', () => ({ login: jest.fn(), registro: jest.fn() }));
+jest.mock('../api/auth', () => ({ login: jest.fn() }));
 jest.mock('../api/sesion', () => ({ guardarSesion: jest.fn() }));
 
 const reemplazar = jest.fn();
-const routerFalso = { replace: reemplazar } as unknown as ReturnType<typeof useRouter>;
+const empujar = jest.fn();
+const routerFalso = { replace: reemplazar, push: empujar } as unknown as ReturnType<
+  typeof useRouter
+>;
 const useRouterMock = jest.mocked(useRouter);
 const loginMock = jest.mocked(login);
-const registroMock = jest.mocked(registro);
 const guardarMock = jest.mocked(guardarSesion);
 
 const SESION = {
@@ -34,9 +36,9 @@ async function pulsar(texto: string) {
 describe('pantalla de login', () => {
   beforeEach(() => {
     reemplazar.mockReset();
+    empujar.mockReset();
     useRouterMock.mockReturnValue(routerFalso);
     loginMock.mockReset();
-    registroMock.mockReset();
     guardarMock.mockReset();
     guardarMock.mockResolvedValue();
   });
@@ -85,16 +87,13 @@ describe('pantalla de login', () => {
     expect(reemplazar).not.toHaveBeenCalled();
   });
 
-  it('crear cuenta registra al usuario', async () => {
-    registroMock.mockResolvedValue(SESION);
+  it('crear cuenta abre la pantalla de registro', async () => {
     await render(<Login />);
 
-    await escribir('Correo', 'ana@correo.co');
-    await escribir('Contraseña', 'secreta');
     await pulsar('Crear cuenta');
 
-    await waitFor(() => expect(reemplazar).toHaveBeenCalledWith('/'));
-    expect(registroMock).toHaveBeenCalledWith('ana@correo.co', 'secreta');
-    expect(guardarMock).toHaveBeenCalledWith(SESION);
+    expect(empujar).toHaveBeenCalledWith('/registro');
+    expect(loginMock).not.toHaveBeenCalled();
+    expect(guardarMock).not.toHaveBeenCalled();
   });
 });

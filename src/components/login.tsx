@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
-import { login, registro } from '../api/auth';
+import { login } from '../api/auth';
 import { guardarSesion } from '../api/sesion';
 
 function useAcceso() {
@@ -11,7 +11,7 @@ function useAcceso() {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  async function enviar(esRegistro: boolean): Promise<void> {
+  async function enviar(): Promise<void> {
     if (enviando) return;
     if (correo.trim() === '' || clave === '') {
       setError('Escribe tu correo y tu contraseña');
@@ -20,7 +20,7 @@ function useAcceso() {
     setError(null);
     setEnviando(true);
     try {
-      const sesion = esRegistro ? await registro(correo, clave) : await login(correo, clave);
+      const sesion = await login(correo, clave);
       await guardarSesion(sesion);
       router.replace('/');
     } catch (fallo) {
@@ -34,6 +34,7 @@ function useAcceso() {
 
 export function Login() {
   const { correo, clave, error, enviando, setCorreo, setClave, enviar } = useAcceso();
+  const router = useRouter();
 
   return (
     <View style={styles.contenedor}>
@@ -61,13 +62,13 @@ export function Login() {
         title="Entrar"
         accessibilityLabel="Entrar"
         disabled={enviando}
-        onPress={() => void enviar(false)}
+        onPress={() => void enviar()}
       />
       <Button
         title="Crear cuenta"
         accessibilityLabel="Crear cuenta"
         disabled={enviando}
-        onPress={() => void enviar(true)}
+        onPress={() => router.push('/registro')}
       />
     </View>
   );
