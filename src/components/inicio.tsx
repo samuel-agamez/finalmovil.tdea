@@ -1,10 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Button, StyleSheet, Text, View } from 'react-native';
 
 export function Inicio() {
+  const router = useRouter();
+
   return (
     <View style={styles.contenedor}>
       <Text style={styles.titulo}>Tarjetas de estudio</Text>
       <Text style={styles.texto}>Repaso espaciado con cajas de Leitner</Text>
+      <Button title="Entrar" accessibilityLabel="Entrar" onPress={() => router.push('/login')} />
     </View>
   );
 }

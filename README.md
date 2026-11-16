@@ -14,11 +14,13 @@ Repositorio hermano: [`repositario_de_prueba`](https://github.com/samuel-agamez/
 - `05c20f3`: regla pura de Leitner y sus pruebas.
 - `a4a34b3`: enlaces y hashes del README.
 - `0001142`: puerta `npm run check` en verde con las versiones del SDK 58.
+- `96f6df9`: base de Expo Router y pantalla de inicio.
+- `c860220`: cliente HTTP de la API (`pedir`, `FalloApi`).
+- `28f9729`: autenticación y sesión en `expo-secure-store`.
 
-Estado actual: la puerta está en verde (typecheck + lint + formato + 7
-pruebas, cobertura 100 % de statements y funciones) y existe la base de
-rutas (`app/_layout.tsx` + `app/index.tsx`). Faltan la interfaz de
-autenticación, los mazos, SQLite y la sincronización.
+Estado actual: la puerta está en verde (typecheck + lint + formato + 27
+pruebas, cobertura 95 % de statements) con la pantalla de login y
+registro conectada a la API. Faltan los mazos, SQLite y la sincronización.
 
 ## Requisitos
 

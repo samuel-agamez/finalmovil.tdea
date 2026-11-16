@@ -104,3 +104,28 @@ Se agregan las entradas de cada sesión real; no se borran las correcciones.
   compila expo-router con Babel en frío; sin eso, Jest falla a los 5 s.
   `expo-router/testing-library` ya viene en expo-router 58: no se instaló
   ningún paquete nuevo.
+
+## 2026-11-16 · Pantalla de login y registro
+
+- **Propósito**: conectar la interfaz de acceso con la API existente
+  (solo el contrato del README, sin funcionalidades nuevas).
+- **Evidencia**: `src/components/login.tsx` (formulario con `useAcceso`),
+  `app/login.tsx` (reexport), `src/components/login.test.tsx` (5 pruebas),
+  botón «Entrar» en `inicio.tsx` y la pantalla `login` en `_layout.tsx`.
+- **Validación**: la prueba se escribió primero y falló (no existía la
+  pantalla); después pasa. `npm run check` → typecheck + lint + formato +
+  27 pruebas, cobertura 95 %.
+- **Hallazgo**: en React Native Testing Library **v14 `render` y
+  `fireEvent` son `async`**. Sin `await`, `screen` nunca registra el
+  árbol (error «`render` function has not been called») y los eventos no
+  se despachan (el `TextInput` conserva `value=""` y el botón no llega a
+  llamar a la API). Se diagnosticó con una prueba temporal que imprimía
+  `render.toString()` → `async function render(...)`, y con
+  `fireEvent.changeText` seguido de lectura inmediata del `value`.
+- **Decisión**: se descartó `renderRouter()` para este test (arrastraba
+  estado global entre pruebas y provocaba llamadas `act()` solapadas) y
+  se usó `render()` con `expo-router` mockeado (`useRouter` →
+  `{ replace }`), que es más rápido y aísla cada prueba.
+- **Decisión extra**: la lógica de envío vive en el hook `useAcceso()`
+  para que el componente `Login` respete el límite de 50 líneas por
+  función que exige ESLint.
