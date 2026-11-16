@@ -82,3 +82,25 @@ Se agregan las entradas de cada sesión real; no se borran las correcciones.
      directorio `flat/` no se puede importar) y `app.json` formateado.
 - **Decisión extra**: se corrigió la puerta en lugar de salirse de ella;
   ninguna de las cuatro correcciones añade reglas ni relaja la calidad.
+
+## 2026-11-15 · Base de Expo Router
+
+- **Propósito**: crear la estructura de rutas con una prueba que falla
+  primero, antes de construir pantallas.
+- **Evidencia**: `app/_layout.tsx`, `app/index.tsx`,
+  `src/components/inicio.tsx`, `src/components/inicio.test.tsx` y
+  `app.json` (`scheme: tarjetas`, `android.package` e
+  `ios.bundleIdentifier: tdea.tarjetas`).
+- **Validación**: la prueba se escribió primero y falló (no existía
+  `app/`); después pasa con `renderRouter()`. `npm run check` → 7 pruebas,
+  cobertura 100 %; `npm run build` exporta Android y `npx expo config
+--type public` muestra el scheme y los identificadores.
+- **Decisión**: la pantalla vive en `src/components/inicio.tsx` y
+  `app/index.tsx` solo la reexporta, para que la cobertura
+  (`collectCoverageFrom: src/**`) la mida. Los tests de rutas van en
+  `src/` y no en `app/`: Expo Router trataría `app/*.test.tsx` como una
+  ruta más.
+- **Decisión extra**: `renderRouter()` recibe timeout propio (30 s) porque
+  compila expo-router con Babel en frío; sin eso, Jest falla a los 5 s.
+  `expo-router/testing-library` ya viene en expo-router 58: no se instaló
+  ningún paquete nuevo.

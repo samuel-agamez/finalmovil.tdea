@@ -13,10 +13,12 @@ Repositorio hermano: [`repositario_de_prueba`](https://github.com/samuel-agamez/
 - `78ddcbf`: **configuración de IA y de calidad** (primer commit).
 - `05c20f3`: regla pura de Leitner y sus pruebas.
 - `a4a34b3`: enlaces y hashes del README.
+- `0001142`: puerta `npm run check` en verde con las versiones del SDK 58.
 
-La puerta `npm run check` está en verde (typecheck + lint + formato + 6
-pruebas, cobertura 100 % de statements y funciones). La interfaz, SQLite y
-la sincronización se construyen en los siguientes commits.
+Estado actual: la puerta está en verde (typecheck + lint + formato + 7
+pruebas, cobertura 100 % de statements y funciones) y existe la base de
+rutas (`app/_layout.tsx` + `app/index.tsx`). Faltan la interfaz de
+autenticación, los mazos, SQLite y la sincronización.
 
 ## Requisitos
 

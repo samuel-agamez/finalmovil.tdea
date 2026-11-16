@@ -1,3 +1,10 @@
 {
+  "scheme": "tarjetas",
+  "android": {
+    "package": "tdea.tarjetas"
+  },
+  "ios": {
+    "bundleIdentifier": "tdea.tarjetas"
+  },
   "plugins": ["expo-router", "expo-sqlite", "expo-secure-store", "expo-status-bar"]
 }
