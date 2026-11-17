@@ -133,6 +133,24 @@ La entrega es un **APK de Android**. El proyecto ya está enlazado con EAS:
 - Perfiles de `eas.json`: `preview` → `apk` (instalación directa) y
   `production` → `aab` (Play Store).
 
+### Build de entrega
+
+|          |                                                                                  |
+| -------- | -------------------------------------------------------------------------------- |
+| Build ID | `417694d7-73e4-41ae-83d9-8f129924fec6`                                           |
+| Perfil   | `preview` (`buildType: apk`)                                                     |
+| Versión  | `0.1.0` (versionCode 1)                                                          |
+| Descarga | <https://expo.dev/artifacts/eas/XlPtTm1VZ-iU27IyHwJUd8lmu5FLqxjipq9bVa4JvGI.apk> |
+| Tamaño   | 94,7 MB                                                                          |
+| SHA-256  | `99D1B608692B1C29C2AC8CC80155863FD9B849359236535059110F72BBAC5AB6`               |
+
+Verificado sobre el `.apk` descargado: firma APK v2 presente, `classes.dex`,
+`AndroidManifest.xml` y `assets/index.android.bundle` (3,2 MB); el bundle
+lleva la URL de la API embebida y **no** contiene `firebaseConfig` ni claves
+de Firebase.
+
+### Volver a generar
+
 ```bash
 npm install -g eas-cli
 eas login

@@ -258,3 +258,29 @@ samuel-velasquez`, EAS creó el keystore remoto y el `versionCode` 1.
 - **Decisión**: el build no necesita variables de entorno en EAS porque la
   URL de la API va embebida en el bundle; así la entrega no depende de
   subir archivos `.env` ni de configurar secretos en el panel de EAS.
+
+## 2026-11-17 — APK de entrega compilado y verificado
+
+- **Propósito**: cerrar la entrega del enunciado con el APK instalable y
+  comprobar, sobre el archivo real, que no lleva secretos ni apunta a una
+  dirección equivocada.
+- **Evidencia**: build `417694d7-73e4-41ae-83d9-8f129924fec6` del proyecto
+  `@samuel-velasquez/10-tarjetas-de-estudio-app` (perfil `preview`, estado
+  `FINISHED`), artefacto
+  `https://expo.dev/artifacts/eas/XlPtTm1VZ-iU27IyHwJUd8lmu5FLqxjipq9bVa4JvGI.apk`
+  y `README.md` (sección «Build de entrega»).
+- **Validación**: el `.apk` se descargó (94,7 MB, SHA-256
+  `99D1B608692B1C29C2AC8CC80155863FD9B849359236535059110F72BBAC5AB6`) y se
+  inspeccionó como archivo ZIP: 1330 entradas, `classes.dex`,
+  `AndroidManifest.xml` y `assets/index.android.bundle` (3,2 MB). El bloque
+  de firma APK v2 está presente (magic `APK Sig Block 42` justo antes del
+  directorio central). El bundle **sí** contiene
+  `https://10-tarjetas-de-estudio-api.vercel.app` y **no** contiene
+  `firebaseConfig` ni ninguna clave con formato `AIza...`.
+- **Hallazgo**: el magic de firma no aparece en los últimos 4 KB del
+  archivo, porque el bloque de firma va antes del directorio central; hay
+  que localizar el EOCD para leer el desplazamiento real.
+- **Decisión**: se documenta en el README el enlace, el tamaño y el hash
+  para que la entrega sea reproducible y verificable, y se deja constancia
+  de que el APK no transporta credenciales: la app sigue hablando con la
+  API, que es la única que conoce Firebase.
