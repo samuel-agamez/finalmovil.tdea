@@ -109,4 +109,16 @@ describe('cliente HTTP', () => {
       expect.anything(),
     );
   });
+
+  it('usa la API de producción cuando EXPO_PUBLIC_API_URL está vacía', async () => {
+    process.env.EXPO_PUBLIC_API_URL = '   ';
+    fetchMock.mockResolvedValue(respuesta(200, { items: [] }));
+
+    await pedir({ ruta: '/api/mazos' });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://10-tarjetas-de-estudio-api.vercel.app/api/mazos',
+      expect.anything(),
+    );
+  });
 });

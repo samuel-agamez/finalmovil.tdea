@@ -196,3 +196,37 @@ Se agregan las entradas de cada sesión real; no se borran las correcciones.
 - **Hallazgo**: un `jest` zombi de la sesión anterior seguía corriendo desde
   la noche anterior y saturaba la máquina, provocando timeouts falsos en dos
   suites; se cerró y las pruebas volvieron a ser estables.
+
+## 2026-11-17 — Pantalla azul de Expo Go y `expo-font` faltante
+
+- **Propósito**: diagnosticar la pantalla azul «Something went wrong» que
+  aparecía al abrir la app desde Expo Go y dejar el proyecto listo para
+  compilar el APK.
+- **Evidencia**: `npx expo-doctor` (19/20 checks), `src/api/cliente.ts`
+  (valor por defecto también cuando `EXPO_PUBLIC_API_URL` viene vacía),
+  `src/api/cliente.test.ts` (prueba del caso vacío) y `app.json`
+  (plugin `expo-font`).
+- **Validación**: la prueba nueva falló primero con
+  `Received: "   /api/mazos"`; después `npm run check` quedó en verde (31
+  suites, 184 pruebas) y `npx expo-doctor` en 20/20.
+- **Hallazgo**: el error de login no venía de que faltara la URL: el
+  `.env.local` del proyecto ya exportaba
+  `EXPO_PUBLIC_API_URL=https://10-tarjetas-de-estudio-api.vercel.app` y el
+  bundle de Metro lo lleva embebido. El valor por defecto queda como red de
+  seguridad, y además cubre el caso de la variable definida pero vacía, que
+  `??` no detecta.
+- **Hallazgo**: `expo-doctor` avisaba de que faltaba la dependencia peer
+  `expo-font` (la exige `@expo/vector-icons`): dentro de Expo Go funciona
+  porque Expo Go la trae, pero **fuera de Expo Go la app revienta al
+  abrir**, es decir, el APK habría fallado al iniciar.
+- **Decisión**: se instaló `expo-font` con permiso explícito del usuario y
+  se añadió su plugin a `app.json`, porque sin eso la entrega final
+  (APK) no arranca.
+- **Hallazgo**: el teléfono no llegaba a conectarse al servidor de
+  desarrollo tras reiniciarlo, y Expo Go solo admite SDK 58 desde la
+  versión publicada en las tiendas; una versión anterior de Expo Go abre
+  cualquier proyecto SDK 58 con esa misma pantalla genérica, sin detalle
+  del error.
+- **Decisión**: mientras el usuario actualiza Expo Go, el proyecto queda
+  verificado con `expo-doctor`, la puerta de calidad y un bundle de
+  producción compilado.

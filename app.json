@@ -10,5 +10,12 @@
       "NSMotionUsageDescription": "Inclinar el teléfono marca si sabías la respuesta o no."
     }
   },
-  "plugins": ["expo-router", "expo-sqlite", "expo-secure-store", "expo-status-bar", "expo-sensors"]
+  "plugins": [
+    "expo-router",
+    "expo-sqlite",
+    "expo-secure-store",
+    "expo-status-bar",
+    "expo-sensors",
+    "expo-font"
+  ]
 }

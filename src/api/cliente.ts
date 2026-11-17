@@ -20,7 +20,8 @@ export async function pedir<T>(peticion: Peticion): Promise<T> {
 }
 
 function base(): string {
-  return process.env.EXPO_PUBLIC_API_URL ?? API_POR_DEFECTO;
+  const configurada = process.env.EXPO_PUBLIC_API_URL?.trim();
+  return configurada !== undefined && configurada !== '' ? configurada : API_POR_DEFECTO;
 }
 
 function cabeceras(token: string | null | undefined): Record<string, string> {
