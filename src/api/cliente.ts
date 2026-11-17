@@ -1,5 +1,7 @@
 import { FalloApi, type DetalleCampo } from './errores';
 
+const API_POR_DEFECTO = 'https://10-tarjetas-de-estudio-api.vercel.app';
+
 type Metodo = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export type Peticion = {
@@ -18,7 +20,7 @@ export async function pedir<T>(peticion: Peticion): Promise<T> {
 }
 
 function base(): string {
-  return process.env.EXPO_PUBLIC_API_URL ?? '';
+  return process.env.EXPO_PUBLIC_API_URL ?? API_POR_DEFECTO;
 }
 
 function cabeceras(token: string | null | undefined): Record<string, string> {

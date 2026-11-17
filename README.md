@@ -92,6 +92,11 @@ cp .env.example .env.local   # ajusta EXPO_PUBLIC_API_URL
 npm start
 ```
 
+La variable `EXPO_PUBLIC_API_URL` es **pública** (no es un secreto) y solo
+apunta al despliegue de la API. Si no defines ninguna, la app usa por defecto
+`https://10-tarjetas-de-estudio-api.vercel.app`, así que funciona sin
+`.env.local` tanto en el teléfono como en la compilación del APK.
+
 Dependencias instaladas con `npx expo install` (versiones del SDK 58) más
 tres fijadas a mano por compatibilidad:
 

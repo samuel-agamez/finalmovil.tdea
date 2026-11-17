@@ -165,3 +165,34 @@ Se agregan las entradas de cada sesión real; no se borran las correcciones.
 - **Decisión**: los gestos se apoyan siempre en botones equivalentes con
   `accessibilityLabel`, porque un lector de pantalla no ejecuta gestos
   complejos.
+
+## 2026-11-17 — La app llama a la API aunque no exista `.env.local`
+
+- **Propósito**: corregir el error 500 que la app mostraba al iniciar sesión
+  y cargar los mazos.
+- **Evidencia**: `src/api/cliente.ts` (`API_POR_DEFECTO` como valor por
+  defecto de `base()`) y su prueba en `src/api/cliente.test.ts`.
+- **Validación**: la prueba se escribió primero y falló con
+  `Expected: "https://10-tarjetas-de-estudio-api.vercel.app/api/mazos"` frente
+  a `Received: "/api/mazos"`; después `npm run check` quedó en verde (31
+  suites, 183 pruebas, cobertura 92,4 % statements y 84,58 % ramas).
+- **Hallazgo**: sin `.env.local`, `process.env.EXPO_PUBLIC_API_URL` era
+  `undefined` y la app pedía rutas relativas (`/api/auth/login`); el
+  servidor de Metro respondía 500 y ese era el error que se veía en el
+  teléfono. La variable sigue siendo la única forma de cambiar el
+  destino, pero ya no es obligatoria.
+- **Decisión**: el valor por defecto es la URL pública del despliegue en
+  Vercel, que no es un secreto; así la app funciona en el teléfono y en la
+  compilación del APK sin copiar archivos `.env`.
+- **Hallazgo**: el CLI de Expo reescribió `package.json` y
+  `package-lock.json` al alinear las versiones con el SDK 58 (`expo`
+  58.0.26, `expo-router` 58.0.32, `expo-sqlite` 58.0.18, `jest-expo`
+  58.0.15) y también tocó `tsconfig.json`; `tsconfig.json` se restauró a
+  `HEAD` porque el usuario pidió no modificarlo.
+- **Hallazgo**: `npm audit` reporta avisos del árbol de herramientas de
+  Expo, Jest y React Native (picomatch, tinyglobby, minimatch) cuya única
+  "solución" es bajar de versión mayor (Expo 52, Jest 29); no afectan al
+  código que viaja en el APK, así que no se cambian las dependencias.
+- **Hallazgo**: un `jest` zombi de la sesión anterior seguía corriendo desde
+  la noche anterior y saturaba la máquina, provocando timeouts falsos en dos
+  suites; se cerró y las pruebas volvieron a ser estables.
