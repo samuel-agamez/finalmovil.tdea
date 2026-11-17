@@ -21,6 +21,11 @@ Repositorio hermano: [`repositario_de_prueba`](https://github.com/samuel-agamez/
 - `82c8495`: **SQLite local** (migraciones), repositorios de mazos y
   tarjetas y servicios puros (Leitner, vencidas, validaciones).
 - `f267092`: tarjeta de estudio que voltea y **sensor de voz** (`expo-speech`).
+- `4135fd0`: pantallas completas (mazos, tarjetas, estudio, alta), gestos,
+  sensores, sincronización con la API y diseño premium.
+- `7d91ead`: `expo-font` instalada (peer dep de `@expo/vector-icons`) y la
+  URL de la API embebida aunque no exista `.env.local`.
+- `f9d7bae`: proyecto enlazado con **EAS** (`@samuel-velasquez/10-tarjetas-de-estudio-app`).
 
 Estado actual: la puerta está en verde (typecheck + lint + formato + pruebas
 con cobertura ≥ 80 % en statements, ramas, líneas y funciones) con:
@@ -118,6 +123,36 @@ tres fijadas a mano por compatibilidad:
 | `npm test`             | Jest + jest-expo con cobertura.                            |
 | `npm start`            | Expo.                                                      |
 | `npm run build`        | `expo export --platform android`.                          |
+
+## Generar el APK (EAS Cloud)
+
+La entrega es un **APK de Android**. El proyecto ya está enlazado con EAS:
+
+- Proyecto: `@samuel-velasquez/10-tarjetas-de-estudio-app`
+- `projectId`: `9248743c-9265-49ff-94fc-ecff3c13ef97` (en `app.json`)
+- Perfiles de `eas.json`: `preview` → `apk` (instalación directa) y
+  `production` → `aab` (Play Store).
+
+```bash
+npm install -g eas-cli
+eas login
+eas build -p android --profile preview
+```
+
+La compilación ocurre en la nube de EAS (15-25 min) y devuelve un enlace de
+descarga del `.apk`. Se instala en el teléfono habilitando "instalar apps
+de orígenes desconocidos" para el navegador o el explorador de archivos.
+
+El build **no** necesita variables de entorno: la URL de la API va embebida
+en el bundle (`API_POR_DEFECTO` en `src/api/cliente.ts`), así que el APK
+funciona aunque no exista ningún `.env`.
+
+Seguimiento de un build:
+
+```bash
+eas build:list --platform android
+eas build:view <BUILD_ID>
+```
 
 ## Configuración de IA
 

@@ -230,3 +230,31 @@ Se agregan las entradas de cada sesión real; no se borran las correcciones.
 - **Decisión**: mientras el usuario actualiza Expo Go, el proyecto queda
   verificado con `expo-doctor`, la puerta de calidad y un bundle de
   producción compilado.
+
+## 2026-11-17 — Proyecto enlazado con EAS y compilación del APK
+
+- **Propósito**: generar la entrega final (APK de Android) con EAS Cloud y
+  dejar documentado el proceso.
+- **Evidencia**: `app.json` (`owner: samuel-velasquez` y
+  `extra.eas.projectId`), `eas.json` (perfil `preview` con
+  `buildType: apk`), `README.md` (sección «Generar el APK») y el build
+  `417694d7-73e4-41ae-83d9-8f129924fec6` del proyecto
+  `@samuel-velasquez/10-tarjetas-de-estudio-app`.
+- **Validación**: `npm run check` en verde (31 suites, 184 pruebas) antes de
+  subir; el proyecto quedó enlazado con `eas init --account
+samuel-velasquez`, EAS creó el keystore remoto y el `versionCode` 1.
+- **Hallazgo**: `eas build:configure` exige stdin interactivo (pregunta el
+  propietario); en un entorno no interactivo falla y se resuelve con
+  `eas init --account <cuenta> --non-interactive`, que hace lo mismo y
+  escribe el `projectId` en `app.json`.
+- **Hallazgo**: la primera subida del tarball falló con `ECONNRESET` contra
+  el almacenamiento de Google (256 KB de 417 KB); es un error de red
+  transitorio y el reintento subió bien. El comando en primer plano se
+  quedó esperando hasta agotar el tiempo, pero el build sí se había
+  creado: se comprobó con `eas build:list`.
+- **Decisión**: el perfil `preview` genera un `.apk` instalable sin pasar
+  por Play Store, que es lo que pide el enunciado. El perfil `production`
+  queda en `.aab` para una publicación futura.
+- **Decisión**: el build no necesita variables de entorno en EAS porque la
+  URL de la API va embebida en el bundle; así la entrega no depende de
+  subir archivos `.env` ni de configurar secretos en el panel de EAS.
