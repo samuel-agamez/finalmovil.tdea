@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { login } from '../api/auth';
 import { guardarSesion } from '../api/sesion';
+import { COLORS, RADIUS, SPACING } from '../theme';
 
 function useAcceso() {
   const router = useRouter();
@@ -32,13 +33,17 @@ function useAcceso() {
   return { correo, clave, error, enviando, setCorreo, setClave, enviar };
 }
 
-export function Login() {
-  const { correo, clave, error, enviando, setCorreo, setClave, enviar } = useAcceso();
-  const router = useRouter();
+type PropsCampos = {
+  correo: string;
+  clave: string;
+  setCorreo: (valor: string) => void;
+  setClave: (valor: string) => void;
+};
 
+function CamposCredenciales({ correo, clave, setCorreo, setClave }: PropsCampos) {
   return (
-    <View style={styles.contenedor}>
-      <Text style={styles.titulo}>Iniciar sesión</Text>
+    <>
+      <Text style={styles.etiqueta}>Correo</Text>
       <TextInput
         style={styles.campo}
         accessibilityLabel="Correo"
@@ -46,30 +51,64 @@ export function Login() {
         autoComplete="email"
         keyboardType="email-address"
         placeholder="correo@ejemplo.com"
+        placeholderTextColor={COLORS.textMuted}
         value={correo}
         onChangeText={setCorreo}
       />
+      <Text style={styles.etiqueta}>Contraseña</Text>
       <TextInput
         style={styles.campo}
         accessibilityLabel="Contraseña"
         secureTextEntry
         placeholder="Tu contraseña"
+        placeholderTextColor={COLORS.textMuted}
         value={clave}
         onChangeText={setClave}
       />
-      {error !== null && <Text style={styles.error}>{error}</Text>}
-      <Button
-        title="Entrar"
-        accessibilityLabel="Entrar"
-        disabled={enviando}
-        onPress={() => void enviar()}
-      />
-      <Button
-        title="Crear cuenta"
-        accessibilityLabel="Crear cuenta"
-        disabled={enviando}
-        onPress={() => router.push('/registro')}
-      />
+    </>
+  );
+}
+
+export function Login() {
+  const { correo, clave, error, enviando, setCorreo, setClave, enviar } = useAcceso();
+  const router = useRouter();
+
+  return (
+    <View style={styles.contenedor}>
+      <View style={styles.tarjeta}>
+        <Text style={styles.marca}>TARJETAS</Text>
+        <Text style={styles.titulo}>Iniciar sesión</Text>
+        <Text style={styles.subtitulo}>Entra para repasar tus mazos donde los dejaste</Text>
+
+        <CamposCredenciales
+          correo={correo}
+          clave={clave}
+          setCorreo={setCorreo}
+          setClave={setClave}
+        />
+
+        {error !== null && <Text style={styles.error}>{error}</Text>}
+
+        <Pressable
+          style={[styles.boton, enviando && styles.botonOcupado]}
+          accessibilityRole="button"
+          accessibilityLabel="Entrar"
+          disabled={enviando}
+          onPress={() => void enviar()}
+        >
+          <Text style={styles.botonTexto}>{enviando ? 'Entrando...' : 'Entrar'}</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.enlace}
+          accessibilityRole="button"
+          accessibilityLabel="Crear cuenta"
+          disabled={enviando}
+          onPress={() => router.push('/registro')}
+        >
+          <Text style={styles.enlaceTexto}>¿No tienes cuenta? Crear cuenta</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -82,24 +121,84 @@ const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
-    gap: 12,
+    padding: SPACING.l,
+    backgroundColor: COLORS.background,
+  },
+  tarjeta: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.l,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: SPACING.l,
+    gap: SPACING.s,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+  },
+  marca: {
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 2,
+    color: COLORS.primary,
+    textAlign: 'center',
   },
   titulo: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    color: COLORS.textMain,
     textAlign: 'center',
-    marginBottom: 8,
+  },
+  subtitulo: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginBottom: SPACING.s,
+  },
+  etiqueta: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textMain,
+    marginLeft: SPACING.xs,
   },
   campo: {
+    backgroundColor: COLORS.background,
     borderWidth: 1,
-    borderColor: '#999999',
-    borderRadius: 6,
-    padding: 12,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.m,
+    padding: SPACING.m,
     fontSize: 16,
+    color: COLORS.textMain,
   },
   error: {
-    color: '#b00020',
+    color: COLORS.danger,
     textAlign: 'center',
+    fontWeight: '600',
+    marginVertical: SPACING.xs,
+  },
+  boton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.m,
+    paddingVertical: SPACING.m,
+    alignItems: 'center',
+    marginTop: SPACING.s,
+  },
+  botonOcupado: {
+    opacity: 0.6,
+  },
+  botonTexto: {
+    color: COLORS.surface,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  enlace: {
+    alignItems: 'center',
+    padding: SPACING.s,
+  },
+  enlaceTexto: {
+    color: COLORS.primary,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

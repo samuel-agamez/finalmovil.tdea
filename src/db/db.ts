@@ -29,6 +29,10 @@ const MIGRACION = `
   );
   CREATE INDEX IF NOT EXISTS idx_tarjeta_mazo ON tarjeta (mazo_id);
   CREATE INDEX IF NOT EXISTS idx_tarjeta_revision ON tarjeta (proxima_revision);
+  CREATE TABLE IF NOT EXISTS ajuste (
+    clave TEXT PRIMARY KEY,
+    valor TEXT NOT NULL
+  );
 `;
 
 export async function abrirDb(): Promise<Db> {

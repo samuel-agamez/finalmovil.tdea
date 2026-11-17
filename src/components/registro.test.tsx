@@ -49,7 +49,7 @@ describe('pantalla de registro', () => {
     expect(screen.getByLabelText('Correo')).toBeTruthy();
     expect(screen.getByLabelText('Contraseña')).toBeTruthy();
     expect(screen.getByText('Registrarme')).toBeTruthy();
-    expect(screen.getByText('Ya tengo cuenta')).toBeTruthy();
+    expect(screen.getByLabelText('Ya tengo cuenta')).toBeTruthy();
   });
 
   it('no envía nada si faltan los campos', async () => {
@@ -101,7 +101,7 @@ describe('pantalla de registro', () => {
   it('ya tengo cuenta lleva a la pantalla de login', async () => {
     await render(<Registro />);
 
-    await pulsar('Ya tengo cuenta');
+    await fireEvent.press(screen.getByLabelText('Ya tengo cuenta'));
 
     expect(empujar).toHaveBeenCalledWith('/login');
   });

@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { COLORS, SPACING, RADIUS } from '../theme';
 
 export type PropsTarjetaEstudio = {
   pregunta: string;
@@ -8,45 +9,69 @@ export type PropsTarjetaEstudio = {
 };
 
 export function TarjetaEstudio({ pregunta, respuesta, volteada, onVoltear }: PropsTarjetaEstudio) {
-  const etiqueta = volteada
-    ? `Respuesta: ${respuesta}`
-    : `Pregunta: ${pregunta}. Toca para ver la respuesta`;
-
   return (
     <Pressable
       testID="tarjeta-estudio"
       accessibilityRole="button"
-      accessibilityLabel={etiqueta}
+      accessibilityLabel={volteada ? `Respuesta: ${respuesta}` : `Pregunta: ${pregunta}`}
       accessibilityHint="Toca para voltear la tarjeta"
-      style={styles.tarjeta}
+      style={[styles.card, volteada ? styles.cardRespuesta : styles.cardPregunta]}
       onPress={onVoltear}
     >
-      <Text style={styles.texto}>{volteada ? respuesta : pregunta}</Text>
-      <Text style={styles.pista}>{volteada ? 'Respuesta' : 'Toca para voltear'}</Text>
+      <View style={styles.contenido}>
+        <Text style={styles.etiqueta}>{volteada ? 'RESPUESTA' : 'PREGUNTA'}</Text>
+        <Text style={styles.texto}>{volteada ? respuesta : pregunta}</Text>
+      </View>
+      <Text style={styles.pista}>
+        {volteada ? 'Toca para volver' : 'Toca para ver la respuesta'}
+      </Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  tarjeta: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    padding: 24,
-    marginVertical: 12,
-    minHeight: 180,
-    justifyContent: 'center',
+  card: {
+    borderRadius: RADIUS.l,
+    padding: SPACING.l,
+    marginVertical: SPACING.m,
+    minHeight: 240,
+    justifyContent: 'space-between',
     alignItems: 'center',
+    borderWidth: 2,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  cardPregunta: {
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.border,
+  },
+  cardRespuesta: {
+    backgroundColor: COLORS.primaryLight,
+    borderColor: COLORS.primary,
+  },
+  contenido: {
+    alignItems: 'center',
+    gap: SPACING.m,
+  },
+  etiqueta: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: COLORS.textMuted,
+    letterSpacing: 1.5,
   },
   texto: {
-    fontSize: 20,
+    fontSize: 22,
     textAlign: 'center',
-    color: '#111111',
+    color: COLORS.textMain,
+    fontWeight: '500',
+    lineHeight: 30,
   },
   pista: {
-    marginTop: 16,
     fontSize: 13,
-    color: '#666666',
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
   },
 });

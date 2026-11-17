@@ -1,10 +1,14 @@
 {
   "scheme": "tarjetas",
   "android": {
-    "package": "tdea.tarjetas"
+    "package": "tdea.tarjetas",
+    "permissions": ["android.permission.VIBRATE"]
   },
   "ios": {
-    "bundleIdentifier": "tdea.tarjetas"
+    "bundleIdentifier": "tdea.tarjetas",
+    "infoPlist": {
+      "NSMotionUsageDescription": "Inclinar el teléfono marca si sabías la respuesta o no."
+    }
   },
-  "plugins": ["expo-router", "expo-sqlite", "expo-secure-store", "expo-status-bar"]
+  "plugins": ["expo-router", "expo-sqlite", "expo-secure-store", "expo-status-bar", "expo-sensors"]
 }

@@ -129,3 +129,39 @@ Se agregan las entradas de cada sesión real; no se borran las correcciones.
 - **Decisión extra**: la lógica de envío vive en el hook `useAcceso()`
   para que el componente `Login` respete el límite de 50 líneas por
   función que exige ESLint.
+
+## 2026-11-16 — Base de datos local, pantallas y sensor de voz
+
+- **Propósito**: cerrar el Hito 2 (SQLite, CRUD, búsqueda y funcionamiento
+  sin conexión) y el Hito 1 (pantallas navegables, formularios validados y
+  un sensor), que era el hueco más grande del enunciado.
+- **Evidencia**: `src/db/db.ts` (apertura y migraciones), `src/repositories/`
+  (`mazos.ts`, `tarjetas.ts`, `tipos.ts` con SQL parametrizado),
+  `src/services/` (`mazos.ts`, `tarjetas.ts`, `repaso.ts`, `vencidas.ts`,
+  `fechas.ts`, `validaciones.ts` y `leitner.ts`), `src/sensors/use-voz.ts`,
+  `src/components/` (`tarjeta-estudio.tsx`, `mazo-fila.tsx`,
+  `formulario-mazo.tsx`, `formulario-tarjeta.tsx`, `lista-tarjetas.tsx`,
+  `sesion-estudio.tsx`) y las rutas `app/(tabs)/index.tsx`,
+  `app/mazo/[id].tsx`, `app/tarjeta/nueva.tsx` y `app/estudio/[id].tsx`.
+- **Validación**: `npm run check` en verde con las pruebas nuevas de los
+  servicios, los repositorios, la base de datos y los componentes. Los
+  criterios de aceptación del enunciado tienen pruebas propias: una tarjeta
+  en caja 2 que se acierta pasa a caja 3 con revisión posterior, un fallo
+  vuelve a la caja 1, y sin tarjetas vencidas la lista queda vacía (la
+  pantalla muestra «¡Todo al día!»). La tarjeta de estudio se voltea al
+  tocarla y se anuncia por lector de pantalla.
+- **Hallazgo**: `expo-speech` no tiene `isAvailableAsync` (a diferencia de
+  los sensores); su comprobación equivalente es `getAvailableVoicesAsync()`.
+  Con la lista de voces vacía el hook no lee y la app no se rompe.
+- **Hallazgo**: en RNTL v14 `renderHook` también es asíncrono y `unmount()`
+  devuelve una promesa: sin `await`, la limpieza del sensor no se ejecuta
+  y la prueba falla. Además, un `TypeError` dentro de `waitFor` aborta los
+  reintentos, así que las aserciones usan `result.current?.propiedad`.
+- **Decisión**: la portada se sustituyó por la pestaña de mazos porque
+  Expo Router no admite dos rutas para `/` (`app/index.tsx` y
+  `app/(tabs)/index.tsx`); ahora la raíz redirige al login si no hay
+  sesión. El borrado de un mazo pide confirmación indicando cuántas
+  tarjetas se pierden, como exige el enunciado.
+- **Decisión**: los gestos se apoyan siempre en botones equivalentes con
+  `accessibilityLabel`, porque un lector de pantalla no ejecuta gestos
+  complejos.

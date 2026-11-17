@@ -42,9 +42,7 @@ describe('tarjeta de estudio', () => {
       />,
     );
 
-    expect(
-      screen.getByLabelText('Pregunta: ¿Capital de Francia?. Toca para ver la respuesta'),
-    ).toBeTruthy();
+    expect(screen.getByLabelText('Pregunta: ¿Capital de Francia?')).toBeTruthy();
     expect(screen.getByTestId('tarjeta-estudio').props.accessibilityHint).toBe(
       'Toca para voltear la tarjeta',
     );

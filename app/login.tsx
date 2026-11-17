@@ -1,3 +1,1 @@
-import { Login } from '../src/components/login';
-
-export default Login;
+export { Login as default } from '../src/components/login';

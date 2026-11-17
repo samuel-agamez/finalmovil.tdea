@@ -1,9 +1,15 @@
 import type { Db } from '../db/db';
 import {
   actualizarTarjeta,
+  aplicarCambioRemoto,
   borrarTarjeta,
   crearTarjeta,
+  guardarRemoteId,
   listarPorMazo,
+  listarPendientes,
+  marcarBorradoEnviado,
+  marcarSincronizado,
+  obtenerPorRemoteId,
   obtenerTarjeta,
   vencidasDelMazo,
 } from './tarjetas';
@@ -115,5 +121,135 @@ describe('repositorio de tarjetas', () => {
 
     expect(tarjeta?.caja).toBe(2);
     expect(falso.getFirst).toHaveBeenCalledWith(expect.any(String), [12]);
+  });
+});
+
+describe('sincronización de tarjetas', () => {
+  it('lista solo las tarjetas pendientes', async () => {
+    const falso = dbFalso();
+    falso.getAll.mockResolvedValue([]);
+
+    await listarPendientes(falso.db);
+
+    expect(falso.getAll.mock.calls[0]?.[0] as string).toContain('pending = 1');
+  });
+
+  it('guarda el identificador remoto generado por el cliente', async () => {
+    const falso = dbFalso();
+    falso.run.mockResolvedValue({ changes: 1 });
+
+    await guardarRemoteId(falso.db, 12, 'uuid-t');
+
+    expect(falso.run).toHaveBeenCalledWith(expect.stringContaining('remote_id = ?'), [
+      'uuid-t',
+      12,
+    ]);
+  });
+
+  it('marca la tarjeta como sincronizada', async () => {
+    const falso = dbFalso();
+    falso.run.mockResolvedValue({ changes: 1 });
+
+    await marcarSincronizado(falso.db, 12, 'uuid-t', AHORA);
+
+    const [consulta, valores] = falso.run.mock.calls[0] ?? [];
+    expect(consulta as string).toContain('pending = 0');
+    expect(valores).toEqual(['uuid-t', AHORA, 12]);
+  });
+
+  it('marca el borrado local como ya enviado', async () => {
+    const falso = dbFalso();
+    falso.run.mockResolvedValue({ changes: 1 });
+
+    await marcarBorradoEnviado(falso.db, 12, AHORA);
+
+    expect(falso.run.mock.calls[0]?.[0] as string).toContain('pending = 0');
+  });
+
+  it('busca una tarjeta por su identificador remoto', async () => {
+    const falso = dbFalso();
+    falso.getFirst.mockResolvedValue({ id: 12, caja: 2 });
+
+    const tarjeta = await obtenerPorRemoteId(falso.db, 'uuid-t');
+
+    expect(tarjeta?.caja).toBe(2);
+    expect(falso.getFirst).toHaveBeenCalledWith(expect.stringContaining('remote_id = ?'), [
+      'uuid-t',
+    ]);
+  });
+
+  it('inserta la tarjeta que llega del servidor', async () => {
+    const falso = dbFalso();
+    falso.getFirst.mockResolvedValue(null);
+    falso.run.mockResolvedValue({ lastInsertRowId: 12 });
+
+    const aplicado = await aplicarCambioRemoto(
+      falso.db,
+      {
+        id: 'uuid-t',
+        mazo_id: 'uuid-m',
+        pregunta: '¿2+2?',
+        respuesta: '4',
+        caja: 2,
+        proxima_revision: AHORA,
+        updated_at: AHORA,
+        deleted_at: null,
+      },
+      3,
+    );
+
+    expect(aplicado).toBe(true);
+    expect(falso.run.mock.calls[0]?.[0] as string).toContain('INSERT INTO tarjeta');
+  });
+
+  it('actualiza la tarjeta que ya existe en local', async () => {
+    const falso = dbFalso();
+    falso.getFirst.mockResolvedValue({ id: 12, pending: 0, updated_at: null });
+    falso.run.mockResolvedValue({ changes: 1 });
+
+    const aplicado = await aplicarCambioRemoto(
+      falso.db,
+      {
+        id: 'uuid-t',
+        mazo_id: 'uuid-m',
+        pregunta: '¿2+2?',
+        respuesta: '4',
+        caja: 9,
+        proxima_revision: null,
+        updated_at: AHORA,
+        deleted_at: '2026-11-16T11:00:00.000Z',
+      },
+      3,
+    );
+
+    expect(aplicado).toBe(true);
+    expect(falso.run.mock.calls[0]?.[0] as string).toContain('UPDATE tarjeta');
+  });
+
+  it('conserva el cambio local cuando es más nuevo que el del servidor', async () => {
+    const falso = dbFalso();
+    falso.getFirst.mockResolvedValue({
+      id: 12,
+      pending: 1,
+      updated_at: '2026-11-17T10:00:00.000Z',
+    });
+
+    const aplicado = await aplicarCambioRemoto(
+      falso.db,
+      {
+        id: 'uuid-t',
+        mazo_id: 'uuid-m',
+        pregunta: '¿2+2?',
+        respuesta: '4',
+        caja: 2,
+        proxima_revision: AHORA,
+        updated_at: AHORA,
+        deleted_at: null,
+      },
+      3,
+    );
+
+    expect(aplicado).toBe(false);
+    expect(falso.run).not.toHaveBeenCalled();
   });
 });

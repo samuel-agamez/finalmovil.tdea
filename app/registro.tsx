@@ -1,3 +1,1 @@
-import { Registro } from '../src/components/registro';
-
-export default Registro;
+export { Registro as default } from '../src/components/registro';

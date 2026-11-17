@@ -1,5 +1,5 @@
 import type { Db } from '../db/db';
-import type { Mazo, MazoConProgreso } from './tipos';
+import type { CambioMazo, Mazo, MazoConProgreso } from './tipos';
 
 const CONSULTA_PROGRESO = `
   SELECT m.id, m.nombre, m.remote_id, m.updated_at, m.deleted, m.pending,
@@ -80,4 +80,93 @@ export async function contarTarjetasActivas(db: Db, mazoId: number): Promise<num
     [mazoId],
   );
   return fila?.total ?? 0;
+}
+
+/** Mazos con cambios locales pendientes de subir al servidor. */
+export async function listarPendientes(db: Db): Promise<Mazo[]> {
+  return await db.getAllAsync<Mazo>(
+    'SELECT id, nombre, remote_id, updated_at, deleted, pending FROM mazo WHERE pending = 1 ORDER BY id',
+  );
+}
+
+/** Guarda el UUID generado por el cliente antes de enviarlo. */
+export async function guardarRemoteId(db: Db, id: number, remoteId: string): Promise<void> {
+  await db.runAsync('UPDATE mazo SET remote_id = ? WHERE id = ?', [remoteId, id]);
+}
+
+/** Marca el mazo como sincronizado y guarda los datos del servidor. */
+export async function marcarSincronizado(
+  db: Db,
+  id: number,
+  remoteId: string,
+  updatedAt: string,
+): Promise<void> {
+  await db.runAsync(
+    'UPDATE mazo SET remote_id = ?, updated_at = ?, deleted = 0, pending = 0 WHERE id = ?',
+    [remoteId, updatedAt, id],
+  );
+}
+
+/** Marca el mazo localmente borrado como ya enviado al servidor. */
+export async function marcarBorradoEnviado(db: Db, id: number, updatedAt: string): Promise<void> {
+  await db.runAsync('UPDATE mazo SET updated_at = ?, pending = 0 WHERE id = ?', [updatedAt, id]);
+}
+
+/** Busca un mazo por su identificador remoto (UUID). */
+export async function obtenerPorRemoteId(db: Db, remoteId: string): Promise<Mazo | null> {
+  return await db.getFirstAsync<Mazo>(
+    'SELECT id, nombre, remote_id, updated_at, deleted, pending FROM mazo WHERE remote_id = ?',
+    [remoteId],
+  );
+}
+
+/** Devuelve el UUID remoto del mazo, o null si todavía no tiene. */
+export async function remoteIdDeMazo(db: Db, id: number): Promise<string | null> {
+  const fila = await db.getFirstAsync<{ remote_id: string | null }>(
+    'SELECT remote_id FROM mazo WHERE id = ?',
+    [id],
+  );
+  return fila?.remote_id ?? null;
+}
+
+/**
+ * Aplica un cambio del servidor. Gana la última escritura: si el cambio local
+ * es más nuevo que el del servidor, se conserva lo local.
+ */
+export async function aplicarCambioRemoto(db: Db, cambio: CambioMazo): Promise<boolean> {
+  const local = await db.getFirstAsync<Mazo>(
+    'SELECT id, nombre, remote_id, updated_at, deleted, pending FROM mazo WHERE remote_id = ?',
+    [cambio.id],
+  );
+  if (local !== null && local.pending === 1 && local.updated_at !== null) {
+    if (local.updated_at > cambio.updated_at) return false;
+  }
+  const borrado = cambio.deleted_at !== null ? 1 : 0;
+  if (local !== null) {
+    await db.runAsync(
+      'UPDATE mazo SET nombre = ?, updated_at = ?, deleted = ?, pending = 0 WHERE id = ?',
+      [cambio.nombre, cambio.updated_at, borrado, local.id],
+    );
+    return true;
+  }
+  return await insertarRemoto(db, cambio, borrado);
+}
+
+async function insertarRemoto(db: Db, cambio: CambioMazo, borrado: number): Promise<boolean> {
+  try {
+    await db.runAsync(
+      'INSERT INTO mazo (nombre, remote_id, updated_at, deleted, pending) VALUES (?, ?, ?, ?, 0)',
+      [cambio.nombre, cambio.id, cambio.updated_at, borrado],
+    );
+    return true;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+      await db.runAsync(
+        'UPDATE mazo SET remote_id = ?, updated_at = ?, deleted = ?, pending = 0 WHERE nombre = ?',
+        [cambio.id, cambio.updated_at, borrado, cambio.nombre],
+      );
+      return true;
+    }
+    throw error;
+  }
 }

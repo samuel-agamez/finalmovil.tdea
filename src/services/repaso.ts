@@ -1,7 +1,16 @@
 import type { Db } from '../db/db';
+import { abrirDb } from '../db/db';
 import { actualizarTarjeta, obtenerTarjeta } from '../repositories/tarjetas';
 import { diasHastaRevision, siguienteCaja, type ResultadoRepaso } from './leitner';
 import { sumarDias } from './fechas';
+
+export async function registrarResultado(
+  tarjetaId: number,
+  resultado: ResultadoRepaso,
+): Promise<void> {
+  const db = await abrirDb();
+  await registrarRepaso(db, tarjetaId, resultado);
+}
 
 export async function registrarRepaso(
   db: Db,

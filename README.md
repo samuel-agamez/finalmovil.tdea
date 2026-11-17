@@ -17,10 +17,66 @@ Repositorio hermano: [`repositario_de_prueba`](https://github.com/samuel-agamez/
 - `96f6df9`: base de Expo Router y pantalla de inicio.
 - `c860220`: cliente HTTP de la API (`pedir`, `FalloApi`).
 - `28f9729`: autenticación y sesión en `expo-secure-store`.
+- `b16acb8`: pantalla de **registro** separada de la de login.
+- `82c8495`: **SQLite local** (migraciones), repositorios de mazos y
+  tarjetas y servicios puros (Leitner, vencidas, validaciones).
+- `f267092`: tarjeta de estudio que voltea y **sensor de voz** (`expo-speech`).
 
-Estado actual: la puerta está en verde (typecheck + lint + formato + 27
-pruebas, cobertura 95 % de statements) con la pantalla de login y
-registro conectada a la API. Faltan los mazos, SQLite y la sincronización.
+Estado actual: la puerta está en verde (typecheck + lint + formato + pruebas
+con cobertura ≥ 80 % en statements, ramas, líneas y funciones) con:
+
+- **Autenticación**: login y registro contra la API, sesión en
+  `expo-secure-store`.
+- **Datos locales**: SQLite con `mazo` y `tarjeta` (más `remote_id`,
+  `updated_at`, `deleted` y `pending` para sincronizar), migraciones
+  automáticas y repositorios con SQL parametrizado.
+- **Pantallas**: mazos con progreso y búsqueda, tarjetas del mazo, alta de
+  tarjeta y sesión de repaso con volteo, cajas de Leitner, «¡Todo al día!» y
+  lectura en voz alta.
+- **Gestos y sensores**: deslizar a la derecha o izquierda para marcar
+  acierto o fallo (con botones equivalentes), e inclinación del teléfono
+  (DeviceMotion) como alternativa al gesto.
+
+## Rutas y pantallas
+
+| Ruta            | Contenido                                              |
+| --------------- | ------------------------------------------------------ |
+| `(tabs)/index`  | Mazos con progreso, buscador y alta de mazo            |
+| `mazo/[id]`     | Tarjetas del mazo, añadir, estudiar y eliminar         |
+| `estudio/[id]`  | Sesión de repaso: volteo, acierto/fallo y voz          |
+| `tarjeta/nueva` | Alta de tarjeta con validación (máximo 300 caracteres) |
+| `login`         | Iniciar sesión                                         |
+| `registro`      | Crear cuenta                                           |
+
+La raíz `/` muestra los mazos y, si no hay sesión guardada, redirige al
+login.
+
+## Base de datos local
+
+`src/db/db.ts` abre `tarjetas.db` y aplica las migraciones al arrancar:
+
+```sql
+CREATE TABLE mazo (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre TEXT NOT NULL UNIQUE,
+  remote_id TEXT, updated_at TEXT,
+  deleted INTEGER NOT NULL DEFAULT 0,
+  pending INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE tarjeta (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  mazo_id INTEGER NOT NULL REFERENCES mazo(id) ON DELETE CASCADE,
+  pregunta TEXT NOT NULL, respuesta TEXT NOT NULL,
+  caja INTEGER NOT NULL DEFAULT 1 CHECK (caja BETWEEN 1 AND 5),
+  proxima_revision TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  remote_id TEXT, updated_at TEXT,
+  deleted INTEGER NOT NULL DEFAULT 0,
+  pending INTEGER NOT NULL DEFAULT 0
+);
+```
+
+`pending = 1` marca lo que falta por subir a la API y `remote_id` guarda el
+UUID del documento en Firestore para que reintentar una escritura no duplique.
 
 ## Requisitos
 
