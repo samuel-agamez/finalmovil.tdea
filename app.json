@@ -17,5 +17,16 @@
     "expo-status-bar",
     "expo-sensors",
     "expo-font"
-  ]
+  ],
+  "extra": {
+    "router": {
+      "asyncRoutes": {
+        "web": true
+      }
+    },
+    "eas": {
+      "projectId": "9248743c-9265-49ff-94fc-ecff3c13ef97"
+    }
+  },
+  "owner": "samuel-velasquez"
 }
