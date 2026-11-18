@@ -284,3 +284,37 @@ samuel-velasquez`, EAS creó el keystore remoto y el `versionCode` 1.
   para que la entrega sea reproducible y verificable, y se deja constancia
   de que el APK no transporta credenciales: la app sigue hablando con la
   API, que es la única que conoce Firebase.
+
+## 2026-11-18 — Revisión de la app y corrección de tres defectos
+
+- **Propósito**: revisar la app entregada antes de enviarla al profesor y
+  corregir los defectos encontrados al leer el código (la puerta de calidad
+  y `expo-doctor` ya estaban en verde, así que ningún defecto era de
+  compilación).
+- **Evidencia**: `src/api/sesion.ts` (`ejecutarConSesion`),
+  `src/hooks/use-mazos.ts`, `app/(tabs)/index.tsx`,
+  `src/services/sincronizacion.ts` (`conError`) y
+  `src/services/semillas.ts`; pruebas nuevas en `src/api/sesion.test.ts`,
+  `src/hooks/use-mazos.test.tsx` y `src/services/sincronizacion.test.ts`.
+- **Validación**: `npm run check` en verde con 32 suites y **200 pruebas**;
+  cobertura 92,78 % statements / 85,17 % ramas. Antes de tocar el código se
+  escribieron las pruebas que fallaban (5 en la sesión, 8 en el hook y 1 en
+  la sincronización) y se comprobó el rojo. También se probó la API real:
+  registro, login, `PUT` de mazo y tarjeta, `GET ?since=`, `DELETE`,
+  `POST /api/auth/refresh` (200) y `401` sin token.
+- **Hallazgo**: `refrescar()` existía y estaba probado, pero **nadie lo
+  llamaba**. El token de Firebase dura 3600 s; pasada la hora la
+  sincronización devolvía 401 y la app lo mostraba como «sin conexión».
+- **Hallazgo**: `sincronizarEnFondo` vivía dentro de `cargar`, que dependía
+  del término de búsqueda, así que **cada tecla del buscador** lanzaba las
+  semillas y dos peticiones de red.
+- **Hallazgo**: tras sincronizar no se releía SQLite, así que los cambios
+  traídos del servidor no aparecían hasta volver a entrar a la pantalla.
+- **Hallazgo**: `conError` envolvía el 401 en un `Error` genérico, de modo
+  que la renovación de sesión nunca se habría disparado al subir un cambio
+  pendiente; ahora el 401 se propaga tal cual.
+- **Decisión**: `cargarDatosPrueba()` devuelve si sembró la base, para
+  releer la lista solo cuando de verdad cambió algo. La sincronización
+  corre una vez al abrir, con el token renovado y un solo reintento.
+- **Pendiente conocido**: una doble inclinación muy rápida en «manos
+  libres» puede contar dos veces la misma tarjeta; no afecta a la entrega.
