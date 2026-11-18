@@ -226,6 +226,13 @@ describe('sincronización', () => {
     );
   });
 
+  it('deja pasar el 401 sin envolverlo para que la sesión se renueve', async () => {
+    mazosMock.listarPendientes.mockResolvedValue([mazo()]);
+    pedirMock.mockRejectedValue(new FalloApi(401, 'Token vencido'));
+
+    await expect(enviarPendientes('token')).rejects.toBeInstanceOf(FalloApi);
+  });
+
   it('avisa si la tarjeta pertenece a un mazo que aún no está en el servidor', async () => {
     tarjetasMock.listarPendientes.mockResolvedValue([tarjeta()]);
     mazosMock.remoteIdDeMazo.mockResolvedValue(null);

@@ -1,71 +1,10 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, TextInput, View, Pressable, Text, ActivityIndicator } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, RADIUS } from '../../src/theme';
-import { cargarSesion, cerrarSesion } from '../../src/api/sesion';
+import { cerrarSesion } from '../../src/api/sesion';
 import { FormularioMazo } from '../../src/components/formulario-mazo';
 import { ListaMazos } from '../../src/components/lista-mazos';
-import type { MazoConProgreso } from '../../src/repositories/tipos';
-import { buscarMazos, crearMazo, listarMazos } from '../../src/services/mazos';
-import { sincronizar } from '../../src/services/sincronizacion';
-import { cargarDatosPrueba } from '../../src/services/semillas';
-
-async function sincronizarEnFondo(token: string, alFallar: () => void): Promise<void> {
-  try {
-    await cargarDatosPrueba();
-    await sincronizar(token);
-  } catch {
-    alFallar();
-  }
-}
-
-function useMazos() {
-  const router = useRouter();
-  const [mazos, setMazos] = useState<MazoConProgreso[]>([]);
-  const [termino, setTermino] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [sinConexion, setSinConexion] = useState(false);
-  const [cargando, setCargando] = useState(true);
-
-  const cargar = useCallback(async () => {
-    try {
-      const sesion = await cargarSesion();
-      if (sesion === null) {
-        router.replace('/login');
-        return;
-      }
-      // 1. CARGA INMEDIATA: mostrar los datos locales sin esperar a la red
-      const listaLocal = termino.trim() === '' ? await listarMazos() : await buscarMazos(termino);
-      setMazos(listaLocal);
-      // 2. PROCESOS DE FONDO: semillas y sincronización, sin bloquear la interfaz
-      void sincronizarEnFondo(sesion.token, () => setSinConexion(true));
-    } catch {
-      setSinConexion(true);
-    } finally {
-      setCargando(false);
-    }
-  }, [router, termino]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- la carga inicial es asíncrona y no depende de un evento de usuario
-    void cargar();
-  }, [cargar]);
-
-  const crear = useCallback(
-    async (nombre: string) => {
-      try {
-        await crearMazo(nombre);
-        setError(null);
-        await cargar();
-      } catch (fallo) {
-        setError(fallo instanceof Error ? fallo.message : 'No se pudo crear el mazo');
-      }
-    },
-    [cargar],
-  );
-
-  return { mazos, termino, setTermino, error, sinConexion, crear, cargando };
-}
+import { useMazos } from '../../src/hooks/use-mazos';
 
 export default function Mazos() {
   const router = useRouter();

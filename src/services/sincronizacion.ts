@@ -201,6 +201,8 @@ async function conError<T>(accion: () => Promise<T>, mensaje: string): Promise<T
   try {
     return await accion();
   } catch (error) {
+    // El 401 lo resuelve la capa de sesión renovando el token y reintentando.
+    if (error instanceof FalloApi && error.status === 401) throw error;
     if (error instanceof FalloApi && error.status === 404) {
       throw new Error(`${mensaje}: el recurso no existe en el servidor`);
     }

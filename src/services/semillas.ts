@@ -48,13 +48,14 @@ const COLECCION: MateriaSemilla[] = [
 ];
 
 /** Carga la colección de ejemplo solo si la base de datos está vacía. */
-export async function cargarDatosPrueba(): Promise<void> {
+export async function cargarDatosPrueba(): Promise<boolean> {
   const db = await abrirDb();
   const existente = await db.getFirstAsync<{ id: number }>('SELECT id FROM mazo LIMIT 1');
-  if (existente !== null) return;
+  if (existente !== null) return false;
   for (const materia of COLECCION) {
     await crearMateria(db, materia);
   }
+  return true;
 }
 
 async function crearMateria(db: Db, materia: MateriaSemilla): Promise<void> {
